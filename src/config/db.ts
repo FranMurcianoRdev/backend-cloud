@@ -1,19 +1,58 @@
+// src/config/database.ts
+import { MongoClient, Db } from "mongodb";
+import mockHouses from "../mock/dataMock";
 
-import { MongoClient } from "mongodb";
+interface MockCollection {
+  find: () => {
+    toArray: () => Promise<typeof mockHouses>;
+  };
+  findOne: (query: { _id: string }) => Promise<typeof mockHouses[0] | undefined>;
+  updateOne: (query: { _id: string }, update: { $push: { reviews: { $each: any[] } } }) => Promise<{ matchedCount: number }>;
+}
 
-const url = 'mongodb://localhost:27017'; 
-const client = new MongoClient(url);
-
-const dbName = 'airbnb';
+let db: Db | null = null;
 
 export const connectDB = async () => {
-  try {
-    // Conectar con MongoDB
-    await client.connect();
-    console.log("Conectado a MongoDB");
-    return client.db(dbName); // Retornar la base de datos
-  } catch (error) {
-    console.error("Error al conectar con MongoDB:", error);
-    throw error;
+  const useMocks = process.env.USE_MOCKS === "true";
+
+  if (useMocks) {
+    // Usar datos mock
+    db = {
+      collection: (name: string) => {
+        if (name === "listingsAndReviews") {
+          return {
+            find: () => ({
+              toArray: async () => mockHouses,
+            }),
+            findOne: async (query: { _id: string }) => {
+              return mockHouses.find(house => house._id === query._id);
+            },
+            updateOne: async (query: { _id: string }, update: { $push: { reviews: { $each: any[] } } }) => {
+              const house = mockHouses.find(h => h._id === query._id);
+              if (house) {
+                house.reviews.unshift(update.$push.reviews.$each[0]);
+                return { matchedCount: 1 };
+              }
+              return { matchedCount: 0 };
+            },
+          } as unknown as MockCollection; // Usar as unknown y luego as MockCollection para evitar errores de tipo
+        }
+        return null;
+      },
+    } as unknown as Db; // Usar as unknown y luego as Db para evitar errores de tipo
+    console.log("Usando datos mock en lugar de MongoDB");
+  } else {
+    // Conectar a MongoDB
+    const client = new MongoClient(process.env.MONGO_URI || "");
+    try {
+      await client.connect();
+      db = client.db("airbnb");
+      console.log("Conectado a MongoDB");
+    } catch (error) {
+      console.error("Error al conectar a MongoDB:", error);
+      throw error;
+    }
   }
 };
+
+export const getDB = () => db;
