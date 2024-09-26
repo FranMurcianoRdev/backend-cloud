@@ -1,4 +1,3 @@
-// src/config/database.ts
 import { MongoClient, Db } from "mongodb";
 import mockHouses from "../mock/dataMock";
 
@@ -35,19 +34,19 @@ export const connectDB = async () => {
               }
               return { matchedCount: 0 };
             },
-          } as unknown as MockCollection; // Usar as unknown y luego as MockCollection para evitar errores de tipo
+          } as unknown as MockCollection;
         }
         return null;
       },
-    } as unknown as Db; // Usar as unknown y luego as Db para evitar errores de tipo
+    } as unknown as Db;
     console.log("Usando datos mock en lugar de MongoDB");
   } else {
-    // Conectar a MongoDB
-    const client = new MongoClient(process.env.MONGO_URI || "");
+    // Conectar a MongoDB Atlas
+    const client = new MongoClient(process.env.MONGO_ATLAS_DB_URI || "");
     try {
       await client.connect();
-      db = client.db("airbnb");
-      console.log("Conectado a MongoDB");
+      db = client.db("airbnb"); 
+      console.log("Conectado a MongoDB Atlas");
     } catch (error) {
       console.error("Error al conectar a MongoDB:", error);
       throw error;
