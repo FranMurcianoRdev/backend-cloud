@@ -17,12 +17,12 @@ COPY . .
 RUN npm run build --loglevel verbose
 
 # Expone el puerto de la aplicación
-EXPOSE 3001
+EXPOSE 3000
 
 # Comando para iniciar la aplicación
 CMD ["npm", "start"]
 
-ENV USE_MOCKS=true
+ENV USE_MOCKS=false
 # Instala jq en Alpine
 RUN apk update && apk add jq
 
