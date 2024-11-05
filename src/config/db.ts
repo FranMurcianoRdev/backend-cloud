@@ -5,8 +5,13 @@ interface MockCollection {
   find: () => {
     toArray: () => Promise<typeof mockHouses>;
   };
-  findOne: (query: { _id: string }) => Promise<typeof mockHouses[0] | undefined>;
-  updateOne: (query: { _id: string }, update: { $push: { reviews: { $each: any[] } } }) => Promise<{ matchedCount: number }>;
+  findOne: (query: {
+    _id: string;
+  }) => Promise<(typeof mockHouses)[0] | undefined>;
+  updateOne: (
+    query: { _id: string },
+    update: { $push: { reviews: { $each: any[] } } }
+  ) => Promise<{ matchedCount: number }>;
 }
 
 let db: Db | null = null;
@@ -24,10 +29,13 @@ export const connectDB = async () => {
               toArray: async () => mockHouses,
             }),
             findOne: async (query: { _id: string }) => {
-              return mockHouses.find(house => house._id === query._id);
+              return mockHouses.find((house) => house._id === query._id);
             },
-            updateOne: async (query: { _id: string }, update: { $push: { reviews: { $each: any[] } } }) => {
-              const house = mockHouses.find(h => h._id === query._id);
+            updateOne: async (
+              query: { _id: string },
+              update: { $push: { reviews: { $each: any[] } } }
+            ) => {
+              const house = mockHouses.find((h) => h._id === query._id);
               if (house) {
                 house.reviews.unshift(update.$push.reviews.$each[0]);
                 return { matchedCount: 1 };
@@ -42,10 +50,10 @@ export const connectDB = async () => {
     console.log("Usando datos mock en lugar de MongoDB");
   } else {
     // Conectar a MongoDB Atlas
-    const client = new MongoClient(process.env.MONGO_ATLAS_DB_URI || "");
+    const client = new MongoClient(process.env.MONGO_ATLAS_URI || "");
     try {
       await client.connect();
-      db = client.db("airbnb"); 
+      db = client.db("airbnb");
       console.log("Conectado a MongoDB Atlas");
     } catch (error) {
       console.error("Error al conectar a MongoDB:", error);
