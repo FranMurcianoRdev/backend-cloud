@@ -50,7 +50,7 @@ export const connectDB = async () => {
     console.log("Usando datos mock en lugar de MongoDB");
   } else {
     // Conectar a MongoDB Atlas
-    const client = new MongoClient(process.env.MONGO_ATLAS_URI_DB || "");
+    const client = new MongoClient(process.env.MONGO_ATLAS_URI || "");
     try {
       await client.connect();
       db = client.db("airbnb");
