@@ -20,7 +20,8 @@ RUN npm run build --loglevel verbose
 EXPOSE 3000
 
 # Comando para iniciar la aplicación
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
+
 
 ENV USE_MOCKS=false
 # Instala jq en Alpine
